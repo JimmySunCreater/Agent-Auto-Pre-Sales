@@ -1,0 +1,17 @@
+# ---- 运行时产物（评估结果 / 日志 / run eval 原始输出，含账号 ARN）----
+eval-results/
+eval_*.json
+
+# ---- 黄金集编辑器的自动备份 ----
+eval-dataset/golden_questions.backup-*.json
+
+# ---- 密钥（应放在工程外，防误入）----
+tavilykey
+*.pem
+
+# ---- 系统与缓存 ----
+.DS_Store
+__pycache__/
+*.pyc
+*.log
+nohup.out

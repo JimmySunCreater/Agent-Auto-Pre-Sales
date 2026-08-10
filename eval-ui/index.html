@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tank 500 Eval Console — Local Demo</title>
+<style>
+  :root {
+    --bg: #f4f5f7; --card: #fff; --accent: #1a1a2e; --accent2: #c8a24b;
+    --border: #e2e4e8; --ok: #1d7a3e; --fail: #b3261e; --muted: #8a909b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+                 "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: #24272e; padding-bottom: 60px;
+  }
+  header {
+    background: var(--accent); color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  header h1 { font-size: 17px; font-weight: 600; }
+  header h1 span { color: var(--accent2); }
+  main { max-width: 1080px; margin: 0 auto; padding: 20px 16px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 20px; margin-bottom: 18px;
+  }
+  .card h2 { font-size: 15px; margin-bottom: 12px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .cats label {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 13px;
+    background: #f0f1f4; border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 10px; cursor: pointer; user-select: none;
+  }
+  #ids {
+    flex: 1; min-width: 220px; border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 10px; font-size: 13px; font-family: inherit;
+  }
+  button {
+    border: none; border-radius: 8px; padding: 9px 18px; font-size: 14px;
+    font-weight: 600; cursor: pointer;
+  }
+  button:disabled { opacity: .5; cursor: default; }
+  .primary { background: var(--accent); color: #fff; }
+  .gold { background: var(--accent2); color: #1a1a2e; }
+  .ghost { background: #f0f1f4; color: #24272e; border: 1px solid var(--border); }
+  .statusline { font-size: 13px; color: var(--muted); margin-top: 10px; }
+  .statusline b.run { color: var(--accent2); }
+  progress { width: 100%; height: 8px; margin-top: 8px; }
+  #log {
+    background: #14161c; color: #cdd3de; font: 12px/1.5 ui-monospace, Menlo, monospace;
+    border-radius: 8px; padding: 12px; margin-top: 10px; max-height: 260px;
+    overflow-y: auto; white-space: pre-wrap; word-break: break-all; display: none;
+  }
+  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .metric {
+    border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px;
+    border-left: 5px solid var(--muted);
+  }
+  .metric.ok { border-left-color: var(--ok); }
+  .metric.fail { border-left-color: var(--fail); }
+  .metric .name { font-size: 13px; color: var(--muted); }
+  .metric .rate { font-size: 28px; font-weight: 700; margin: 4px 0; }
+  .metric.ok .rate { color: var(--ok); }
+  .metric.fail .rate { color: var(--fail); }
+  .metric .sub { font-size: 12px; color: var(--muted); }
+  .verdict { font-size: 12px; font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; }
+  tr.qfail { background: #fdf3f2; }
+  .lbl { display: inline-block; border-radius: 6px; padding: 1px 7px; font-size: 11.5px; font-weight: 700; }
+  .lbl.Pass { background: #e2f2e7; color: var(--ok); }
+  .lbl.Fail, .lbl.NoTrace, .lbl.NoResult, .lbl.Error, .lbl.Skipped { background: #fae3e1; color: var(--fail); }
+  .mismatch { color: var(--fail); font-weight: 600; }
+  .expl { color: var(--muted); font-size: 12px; }
+  details.expl-toggle summary { cursor: pointer; color: var(--accent2); font-size: 12px; }
+  details.resp-toggle summary { cursor: pointer; color: var(--accent2); font-size: 12px; margin-top: 4px; }
+  .resp-md {
+    background: #f8f9fb; border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; margin-top: 4px; font-size: 13px; max-width: 640px;
+    max-height: 260px; overflow-y: auto;
+  }
+  .resp-md p { margin: 4px 0; }
+  .resp-md ul { margin: 4px 0; padding-left: 20px; }
+  .resp-md table { border-collapse: collapse; margin: 6px 0; font-size: 12.5px; }
+  .resp-md th, .resp-md td { border: 1px solid var(--border); padding: 3px 7px; }
+  .resp-md code { background: #eceef2; border-radius: 3px; padding: 0 4px; font-size: 12px; }
+  .filters { margin-bottom: 10px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .empty { color: var(--muted); font-size: 13.5px; padding: 8px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>GWM <span>TANK 500</span> · Eval Console <small style="opacity:.6;font-weight:400">local demo</small></h1>
+</header>
+
+<main>
+  <!-- 运行控制 -->
+  <div class="card">
+    <h2>运行评估</h2>
+    <div class="row cats" id="cats"></div>
+    <div class="row" style="margin-top:10px">
+      <input id="ids" placeholder="或输入题目 id（逗号分隔，如 vi-en-01,rl-pol-de-01）——留空且不勾类别 = 全量 48 题">
+      <button class="primary" id="runbtn">▶ 开始评估</button>
+      <button class="ghost" id="refreshbtn">↻ 加载最近结果</button>
+    </div>
+    <div class="statusline" id="statusline">就绪。</div>
+    <progress id="prog" max="100" value="0" style="display:none"></progress>
+    <div id="log"></div>
+    <div class="hint">全量 48 题约 30-45 分钟、评估器调用 88 次；关闭本页不会中断评估（脚本在后台跑），重新打开点"加载最近结果"即可。</div>
+  </div>
+
+  <!-- 黄金问题集编辑 -->
+  <div class="card">
+    <details id="goldenwrap">
+      <summary style="cursor:pointer"><h2 style="display:inline">黄金问题集 <span id="goldencount" style="color:var(--muted);font-weight:400;font-size:13px"></span></h2>
+        <small style="color:var(--muted)">（点击展开：查看 / 编辑 / 增删题目，保存自动备份原文件）</small></summary>
+      <div id="goldeneditor" style="margin-top:12px"><div class="empty">加载中…</div></div>
+      <div class="row" style="margin-top:10px">
+        <button class="ghost" id="addqbtn">＋ 新增题目</button>
+        <button class="gold" id="savegolden">💾 保存到文件</button>
+        <span id="goldenmsg" style="font-size:12.5px;color:var(--muted)"></span>
+      </div>
+      <div class="hint">expected_behavior 由意图自动派生（与评估器映射保持一致）；多轮题在"多轮"列填每行一句；保存前做枚举/唯一性校验，原文件自动备份（保留最近 5 份）。评估运行中请勿保存。</div>
+    </details>
+  </div>
+
+  <!-- 历史评测 -->
+  <div class="card">
+    <h2>历史评测 <small style="color:var(--muted);font-weight:400">（每次运行自动归档，点击查看该轮完整结果）</small></h2>
+    <div id="history"><div class="empty">暂无历史记录。</div></div>
+  </div>
+
+  <!-- 记分卡 -->
+  <div class="card">
+    <h2>三指标记分卡 <span id="viewing" style="font-size:12px;color:var(--accent2);font-weight:400"></span></h2>
+    <div class="metrics" id="metrics"><div class="empty">尚无结果——先运行评估，或点"加载最近结果"。</div></div>
+  </div>
+
+  <!-- 混淆矩阵 -->
+  <div class="card">
+    <h2>意图混淆矩阵 <small style="color:var(--muted);font-weight:400">(expected → detected，judge 校准数据)</small></h2>
+    <div id="confusion"><div class="empty">尚无结果。</div></div>
+  </div>
+
+  <!-- 明细 -->
+  <div class="card">
+    <h2>每题明细</h2>
+    <div class="filters row">
+      <label style="font-size:13px"><input type="checkbox" id="onlyfails"> 只看失分题</label>
+      <span id="failsline" style="font-size:12px;color:var(--muted)"></span>
+    </div>
+    <div id="details"><div class="empty">尚无结果。</div></div>
+  </div>
+</main>
+
+<script>
+  const CATS = ["vehicle_info", "comparison", "web_info", "test_drive", "dealer", "redline"];
+  const METRIC_NAMES = { accuracy: "回答准确率", intent: "意图识别率", compliance: "合规拦截率" };
+  const METRIC_DENOM = { accuracy: "知识型题", intent: "全部题", compliance: "红线题" };
+  let lastResults = null;
+  let polling = null;
+
+  // 类别复选框
+  const catsEl = document.getElementById("cats");
+  CATS.forEach(c => {
+    const label = document.createElement("label");
+    label.innerHTML = `<input type="checkbox" value="${c}"> ${c}`;
+    catsEl.appendChild(label);
+  });
+
+  function subsetValue() {
+    const cats = [...catsEl.querySelectorAll("input:checked")].map(i => i.value);
+    const ids = document.getElementById("ids").value.trim();
+    // 六个类别全选且无 id 过滤 = 全量，按全量处理（历史面板正确标注"全量"）
+    if (cats.length === CATS.length && !ids) return "";
+    const parts = [...cats];
+    if (ids) parts.push(...ids.split(",").map(s => s.trim()).filter(Boolean));
+    return parts.join(",");
+  }
+
+  async function startRun() {
+    const subset = subsetValue();
+    const resp = await fetch("/run", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subset }),
+    });
+    const data = await resp.json();
+    if (!data.ok) { alert(data.message || data.error); return; }
+    document.getElementById("log").style.display = "block";
+    startPolling();
+  }
+
+  function fmtElapsed(s) {
+    if (s == null) return "";
+    const m = Math.floor(s / 60), sec = s % 60;
+    return `${m}m${String(sec).padStart(2, "0")}s`;
+  }
+
+  async function poll() {
+    const resp = await fetch("/status");
+    const st = await resp.json();
+    const line = document.getElementById("statusline");
+    const prog = document.getElementById("prog");
+    const logEl = document.getElementById("log");
+    const runbtn = document.getElementById("runbtn");
+
+    if (st.log_tail) {
+      logEl.style.display = "block";
+      const nearBottom = logEl.scrollHeight - logEl.scrollTop - logEl.clientHeight < 60;
+      logEl.textContent = st.log_tail;
+      if (nearBottom) logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    if (st.running) {
+      runbtn.disabled = true;
+      let ptxt = "";
+      if (st.progress && st.progress.total) {
+        prog.style.display = "block";
+        prog.max = st.progress.total; prog.value = st.progress.current;
+        ptxt = ` · 对话进度 ${st.progress.current}/${st.progress.total}`;
+      }
+      line.innerHTML = `<b class="run">评估运行中</b> · 范围: ${st.subset} · 已用 ${fmtElapsed(st.elapsed)}${ptxt}`;
+    } else {
+      runbtn.disabled = false;
+      prog.style.display = "none";
+      if (st.returncode !== null && st.returncode !== undefined) {
+        line.innerHTML = st.returncode === 0
+          ? `✅ 评估完成（范围: ${st.subset}，用时 ${fmtElapsed(st.elapsed)}）`
+          : `❌ 评估退出码 ${st.returncode}，请查看日志`;
+        stopPolling();
+        loadResults();
+      }
+    }
+  }
+
+  function startPolling() {
+    if (polling) return;
+    polling = setInterval(poll, 3000);
+    poll();
+  }
+  function stopPolling() { clearInterval(polling); polling = null; }
+
+  // ---- 轻量 markdown 渲染（回复展示用；先转义再转换） ----
+  function esc(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function inlineMd(s) {
+    return s
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/g,
+               '<img src="$2" alt="$1" loading="lazy" style="max-width:100%;max-height:220px;border-radius:6px;display:block;margin:6px 0">')
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
+               '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  }
+  function renderMarkdown(text) {
+    const lines = esc(text).split("\n");
+    const out = [];
+    let listOpen = false, tableBuf = [];
+    const closeList = () => { if (listOpen) { out.push("</ul>"); listOpen = false; } };
+    const flushTable = () => {
+      if (!tableBuf.length) return;
+      const rows = tableBuf.filter(r => !/^\s*\|[\s\-:|]+\|\s*$/.test(r));
+      let html = "<table>";
+      rows.forEach((r, i) => {
+        const cells = r.replace(/^\s*\|/, "").replace(/\|\s*$/, "").split("|");
+        const tag = i === 0 ? "th" : "td";
+        html += "<tr>" + cells.map(c => `<${tag}>${inlineMd(c.trim())}</${tag}>`).join("") + "</tr>";
+      });
+      out.push(html + "</table>");
+      tableBuf = [];
+    };
+    for (const raw of lines) {
+      if (/^\s*\|.*\|\s*$/.test(raw)) { closeList(); tableBuf.push(raw); continue; }
+      flushTable();
+      const h = raw.match(/^(#{1,4})\s+(.*)$/);
+      if (h) { closeList(); out.push(`<strong>${inlineMd(h[2])}</strong><br>`); continue; }
+      const li = raw.match(/^\s*(?:[-*•]|\d+[.)])\s+(.*)$/);
+      if (li) {
+        if (!listOpen) { out.push("<ul>"); listOpen = true; }
+        out.push(`<li>${inlineMd(li[1])}</li>`);
+        continue;
+      }
+      closeList();
+      if (raw.trim() === "") continue;
+      out.push(`<p>${inlineMd(raw)}</p>`);
+    }
+    flushTable(); closeList();
+    return out.join("");
+  }
+
+  async function loadResults() {
+    const resp = await fetch("/results");
+    const data = await resp.json();
+    if (!data.available) return;
+    renderAll(data, "（最新一轮）");
+    loadHistory();
+  }
+
+  function renderAll(data, label) {
+    lastResults = data;
+    document.getElementById("viewing").textContent = label || "";
+    renderMetrics(data.scorecard);
+    renderConfusion(data.confusion);
+    renderDetails(data.details);
+    document.getElementById("failsline").textContent =
+      data.fails.length ? `失分题（可复制到上方 id 框复评）: ${data.fails.join(",")}` : "无失分题 🎉";
+  }
+
+  async function loadHistory() {
+    const resp = await fetch("/history");
+    const data = await resp.json();
+    const el = document.getElementById("history");
+    if (!data.runs || !data.runs.length) {
+      el.innerHTML = '<div class="empty">暂无历史记录。</div>';
+      return;
+    }
+    const fmt = (m) => {
+      if (!m || m.rate === null) return "n/a";
+      const cls = m.ok ? "ok" : "fail";
+      return `<span style="color:var(--${m.ok ? "ok" : "fail"});font-weight:600">${(m.rate * 100).toFixed(1)}%</span>`;
+    };
+    let html = "<table><tr><th>时间</th><th>题数</th><th>范围</th><th>准确率</th><th>意图</th><th>合规</th><th></th></tr>";
+    data.runs.forEach(r => {
+      const t = new Date(r.mtime * 1000).toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+      const sc = {};
+      r.scorecard.forEach(m => sc[m.name] = m);
+      html += `<tr><td>${t}</td><td>${r.n_questions}</td><td>${r.subset ? "子集" : "全量"}</td>
+        <td>${fmt(sc.accuracy)}</td><td>${fmt(sc.intent)}</td><td>${fmt(sc.compliance)}</td>
+        <td><button class="ghost" style="padding:4px 10px;font-size:12px" onclick="viewRun('${r.name}')">查看</button></td></tr>`;
+    });
+    el.innerHTML = html + "</table>";
+  }
+
+  async function viewRun(name) {
+    const resp = await fetch("/history/" + encodeURIComponent(name));
+    const data = await resp.json();
+    if (data.available) renderAll(data, `（历史: ${name}）`);
+  }
+  window.viewRun = viewRun;
+
+  // ---- 黄金问题集编辑器 ----
+  const INTENTS = ["vehicle_info", "comparison", "web_info", "test_drive", "dealer", "off_topic"];
+  const LANGS = ["en", "de", "it", "zh"];
+  let golden = [];   // 完整题目对象数组（未知字段原样保留，编辑只改已知字段）
+
+  function sel(options, value) {
+    return options.map(o =>
+      `<option value="${o}"${o === value ? " selected" : ""}>${o}</option>`).join("");
+  }
+
+  function renderGolden() {
+    const el = document.getElementById("goldeneditor");
+    document.getElementById("goldencount").textContent = `（共 ${golden.length} 题）`;
+    if (!golden.length) { el.innerHTML = '<div class="empty">无题目。</div>'; return; }
+    let html = `<table><tr><th style="width:110px">id</th><th>类别</th><th>语言</th><th>期望意图</th>
+      <th style="min-width:260px">题目</th><th style="min-width:170px">多轮（每行一句）</th><th></th></tr>`;
+    golden.forEach((q, i) => {
+      html += `<tr>
+        <td><input data-i="${i}" data-f="id" value="${(q.id || "").replace(/"/g, "&quot;")}"
+             style="width:105px;font-size:12px;padding:4px 6px;border:1px solid var(--border);border-radius:6px"></td>
+        <td><select data-i="${i}" data-f="category" style="font-size:12px">${sel(CATS, q.category)}</select></td>
+        <td><select data-i="${i}" data-f="language" style="font-size:12px">${sel(LANGS, q.language)}</select></td>
+        <td><select data-i="${i}" data-f="expected_intent" style="font-size:12px">${sel(INTENTS, q.expected_intent)}</select></td>
+        <td><textarea data-i="${i}" data-f="question" rows="2"
+             style="width:100%;font-size:12.5px;font-family:inherit;padding:4px 6px;border:1px solid var(--border);border-radius:6px">${(q.question || "").replace(/</g, "&lt;")}</textarea></td>
+        <td><textarea data-i="${i}" data-f="turns" rows="2" placeholder="（单轮留空）"
+             style="width:100%;font-size:12px;font-family:inherit;padding:4px 6px;border:1px solid var(--border);border-radius:6px">${(q.turns || []).join("\n").replace(/</g, "&lt;")}</textarea></td>
+        <td><button class="ghost" style="padding:3px 9px;font-size:12px" onclick="delGolden(${i})">删除</button></td>
+      </tr>`;
+    });
+    el.innerHTML = html + "</table>";
+    // 输入联动回写到 golden 数组
+    el.querySelectorAll("input,select,textarea").forEach(inp => {
+      inp.addEventListener("change", () => {
+        const i = +inp.dataset.i, f = inp.dataset.f;
+        if (f === "turns") {
+          const lines = inp.value.split("\n").map(s => s.trim()).filter(Boolean);
+          if (lines.length >= 2) { golden[i].turns = lines; golden[i].eval_turn = "last"; }
+          else { delete golden[i].turns; delete golden[i].eval_turn; }
+        } else {
+          golden[i][f] = inp.value;
+        }
+      });
+    });
+  }
+
+  async function loadGolden() {
+    try {
+      const resp = await fetch("/golden");
+      const data = await resp.json();
+      golden = data.questions || [];
+      renderGolden();
+    } catch (e) {
+      document.getElementById("goldeneditor").innerHTML =
+        `<div class="empty">加载失败: ${e.message}</div>`;
+    }
+  }
+
+  function delGolden(i) {
+    if (!confirm(`删除题目 ${golden[i].id}？（保存后才写入文件）`)) return;
+    golden.splice(i, 1);
+    renderGolden();
+  }
+  window.delGolden = delGolden;
+
+  document.getElementById("addqbtn").addEventListener("click", () => {
+    golden.push({
+      id: "new-" + Date.now().toString(36),
+      category: "vehicle_info", language: "en",
+      question: "", expected_intent: "vehicle_info",
+      expected_behavior: ["retrieve_tank500_info"], reference_points: [],
+    });
+    renderGolden();
+    document.getElementById("goldeneditor").scrollTop = 1e9;
+  });
+
+  document.getElementById("savegolden").addEventListener("click", async () => {
+    const msg = document.getElementById("goldenmsg");
+    msg.textContent = "保存中…";
+    try {
+      const resp = await fetch("/golden", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questions: golden }),
+      });
+      const data = await resp.json();
+      if (data.ok) {
+        msg.textContent = `✅ 已保存 ${data.total} 题（备份: ${data.backup}）`;
+        loadGolden();
+      } else {
+        msg.textContent = "❌ " + (data.errors || [data.error]).join("；");
+      }
+    } catch (e) {
+      msg.textContent = "❌ " + e.message;
+    }
+  });
+
+  // 展开时才加载（避免与评估数据抢首屏）
+  document.getElementById("goldenwrap").addEventListener("toggle", function () {
+    if (this.open && !golden.length) loadGolden();
+  });
+
+  function renderMetrics(scorecard) {
+    const el = document.getElementById("metrics");
+    el.innerHTML = "";
+    scorecard.forEach(m => {
+      const div = document.createElement("div");
+      const cls = m.ok === null ? "" : (m.ok ? "ok" : "fail");
+      div.className = "metric " + cls;
+      const rate = m.rate === null ? "n/a" : (m.rate * 100).toFixed(1) + "%";
+      const verdict = m.ok === null ? "" :
+        (m.ok ? `<span class="verdict" style="color:var(--ok)">✅ PASS</span>`
+              : `<span class="verdict" style="color:var(--fail)">❌ FAIL</span>`);
+      div.innerHTML = `
+        <div class="name">${METRIC_NAMES[m.name]} <small>(${METRIC_DENOM[m.name]})</small></div>
+        <div class="rate">${rate}</div>
+        <div class="sub">${m.passed}/${m.total} · 目标 ≥${(m.target * 100).toFixed(0)}% ${verdict}</div>`;
+      el.appendChild(div);
+    });
+  }
+
+  function renderConfusion(conf) {
+    const el = document.getElementById("confusion");
+    if (!conf.length) { el.innerHTML = '<div class="empty">无意图数据。</div>'; return; }
+    let html = "<table><tr><th>expected</th><th>detected</th><th>count</th><th></th></tr>";
+    conf.forEach(c => {
+      html += `<tr><td>${c.expected}</td><td class="${c.match ? "" : "mismatch"}">${c.detected}</td>
+               <td>${c.count}</td><td>${c.match ? "" : "← 不一致"}</td></tr>`;
+    });
+    el.innerHTML = html + "</table>";
+  }
+
+  function renderDetails(details) {
+    const only = document.getElementById("onlyfails").checked;
+    const rows = only ? details.filter(d => d.failed) : details;
+    const el = document.getElementById("details");
+    if (!rows.length) { el.innerHTML = '<div class="empty">无匹配行。</div>'; return; }
+    let html = "<table><tr><th>id</th><th>类别/语言</th><th>问题 / Agent 回复</th><th>评估结果</th></tr>";
+    rows.forEach(d => {
+      let evals = "";
+      for (const [ev, r] of Object.entries(d.evals)) {
+        const v = r.value === null ? "—" : Number(r.value).toFixed(2);
+        evals += `<div><b>${ev}</b> ${v} <span class="lbl ${r.label}">${r.label}</span>
+          <details class="expl-toggle"><summary>explanation</summary>
+          <div class="expl">${(r.explanation || "").replace(/</g, "&lt;")}</div></details></div>`;
+      }
+      const respBlock = d.response
+        ? `<details class="resp-toggle" open><summary>Agent 回复</summary>
+           <div class="resp-md">${renderMarkdown(d.response)}</div></details>`
+        : `<div class="expl">（本轮结果未记录回复——旧版归档或未跑对话）</div>`;
+      html += `<tr class="${d.failed ? "qfail" : ""}">
+        <td>${d.id}</td><td>${d.category}<br><small>${d.language}</small></td>
+        <td><div style="font-weight:600">${d.question.replace(/</g, "&lt;")}</div>${respBlock}</td>
+        <td>${evals}</td></tr>`;
+    });
+    el.innerHTML = html + "</table>";
+  }
+
+  document.getElementById("runbtn").addEventListener("click", startRun);
+  document.getElementById("refreshbtn").addEventListener("click", loadResults);
+  document.getElementById("onlyfails").addEventListener("change",
+    () => lastResults && renderDetails(lastResults.details));
+
+  // 启动时：加载已有结果 + 检查是否有正在跑的评估
+  loadResults();
+  fetch("/status").then(r => r.json()).then(st => { if (st.running) startPolling(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+[
+  {
+    "name": "retrieve_tank500_info",
+    "description": "Retrieve Tank 500 vehicle information from the official owner's manual knowledge base (features, controls, safety systems, off-road capabilities, maintenance, technical data). The manual is in English; if retrieval quality is poor for a non-English query, retry with the query translated to English.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "The question or topic about the Tank 500 to search for"
+        }
+      },
+      "required": ["query"]
+    }
+  },
+  {
+    "name": "compare_competitor",
+    "description": "Compare a competitor vehicle against the GWM Tank 500. Returns structured specs for both vehicles. Preset catalog covers: Toyota Land Cruiser Prado, Land Rover Defender 110, Ford Explorer PHEV. For vehicles outside the catalog, it falls back to a live web search (results marked source=web_search).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "competitor_name": {
+          "type": "string",
+          "description": "Competitor vehicle name, e.g. 'Toyota Land Cruiser Prado', 'Defender 110'"
+        },
+        "aspects": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional aspects to focus on: dimensions, powertrain, offroad, price, selling_points"
+        }
+      },
+      "required": ["competitor_name"]
+    }
+  },
+  {
+    "name": "web_search",
+    "description": "Search the web for current information such as local pricing, promotions, launch dates, and market news. Use for anything time-sensitive that is not in the owner's manual.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "The search query"
+        },
+        "market": {
+          "type": "string",
+          "description": "Optional target market to scope the search: de (Germany), uk (United Kingdom), it (Italy)"
+        }
+      },
+      "required": ["query"]
+    }
+  },
+  {
+    "name": "book_test_drive",
+    "description": "Book a Tank 500 test drive / register a sales lead. Collect the customer's name, contact (phone or email), country, and preferred date before calling. Returns a confirmation ID.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Customer name"
+        },
+        "contact": {
+          "type": "string",
+          "description": "Customer phone number or email"
+        },
+        "country": {
+          "type": "string",
+          "description": "Customer country: de, uk, or it"
+        },
+        "preferred_date": {
+          "type": "string",
+          "description": "Preferred test-drive date (YYYY-MM-DD), optional"
+        }
+      },
+      "required": ["name", "contact", "country"]
+    }
+  },
+  {
+    "name": "get_dealer_info",
+    "description": "Get GWM dealer information (name, city, address, phone) for Germany, the United Kingdom, or Italy.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "type": "string",
+          "description": "Country code: de, uk, or it"
+        },
+        "city": {
+          "type": "string",
+          "description": "Optional city filter"
+        }
+      },
+      "required": ["country"]
+    }
+  }
+]

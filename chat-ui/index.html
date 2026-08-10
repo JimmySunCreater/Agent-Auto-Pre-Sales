@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tank 500 Sales Assistant — Local Demo</title>
+<style>
+  :root {
+    --bg: #f4f5f7; --card: #ffffff; --accent: #1a1a2e; --accent2: #c8a24b;
+    --user: #1a1a2e; --agent: #ffffff; --border: #e2e4e8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+                 "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); height: 100vh; display: flex; flex-direction: column;
+  }
+  header {
+    background: var(--accent); color: #fff; padding: 14px 20px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  header h1 { font-size: 17px; font-weight: 600; }
+  header h1 span { color: var(--accent2); }
+  .controls { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .controls label { opacity: .8; }
+  .controls input {
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25);
+    color: #fff; border-radius: 6px; padding: 5px 9px; font-size: 13px; width: 150px;
+  }
+  .controls button {
+    background: var(--accent2); border: none; color: #1a1a2e; font-weight: 600;
+    border-radius: 6px; padding: 6px 12px; font-size: 13px; cursor: pointer;
+  }
+  .controls button:hover { filter: brightness(1.08); }
+  #chat {
+    flex: 1; overflow-y: auto; padding: 24px 16px;
+    max-width: 860px; width: 100%; margin: 0 auto;
+  }
+  .msg { display: flex; margin-bottom: 14px; }
+  .msg.user { justify-content: flex-end; }
+  .bubble {
+    max-width: 76%; padding: 11px 15px; border-radius: 14px;
+    font-size: 14.5px; line-height: 1.55; white-space: pre-wrap; word-break: break-word;
+  }
+  .user .bubble { background: var(--user); color: #fff; border-bottom-right-radius: 4px; }
+  .agent .bubble {
+    background: var(--agent); border: 1px solid var(--border);
+    border-bottom-left-radius: 4px; color: #24272e; white-space: normal;
+  }
+  /* markdown 内容样式 */
+  .bubble h1, .bubble h2, .bubble h3, .bubble h4 { margin: 10px 0 6px; font-size: 15.5px; }
+  .bubble p { margin: 6px 0; }
+  .bubble ul, .bubble ol { margin: 6px 0; padding-left: 22px; }
+  .bubble li { margin: 3px 0; }
+  .bubble code {
+    background: #f0f1f4; border-radius: 4px; padding: 1px 5px;
+    font: 13px ui-monospace, Menlo, monospace;
+  }
+  .bubble pre {
+    background: #14161c; color: #cdd3de; border-radius: 8px; padding: 10px 12px;
+    overflow-x: auto; margin: 8px 0;
+  }
+  .bubble pre code { background: none; color: inherit; padding: 0; }
+  .bubble table { border-collapse: collapse; margin: 8px 0; font-size: 13.5px; }
+  .bubble th, .bubble td { border: 1px solid var(--border); padding: 5px 9px; text-align: left; }
+  .bubble th { background: #f0f1f4; }
+  .bubble a { color: #1a56db; }
+  .bubble strong { font-weight: 700; }
+  .agent.thinking .bubble { color: #9aa0ab; font-style: italic; }
+  .msg { flex-direction: column; }
+  .msg.user { align-items: flex-end; }
+  .msg.agent { align-items: flex-start; }
+  .msgtime { font-size: 10.5px; color: #b3b8c2; margin: 3px 6px 0; }
+  .bubble img {
+    max-width: 100%; max-height: 320px; border-radius: 8px;
+    display: block; margin: 8px 0; border: 1px solid var(--border);
+    cursor: zoom-in;
+  }
+  .sysnote { text-align: center; font-size: 12px; color: #9aa0ab; margin: 10px 0; }
+  footer {
+    background: var(--card); border-top: 1px solid var(--border); padding: 12px 16px;
+  }
+  .inputrow { max-width: 860px; margin: 0 auto; display: flex; gap: 10px; }
+  #input {
+    flex: 1; border: 1px solid var(--border); border-radius: 10px;
+    padding: 11px 14px; font-size: 14.5px; resize: none; height: 46px;
+    font-family: inherit; outline: none;
+  }
+  #input:focus { border-color: var(--accent2); }
+  #send {
+    background: var(--accent); color: #fff; border: none; border-radius: 10px;
+    padding: 0 22px; font-size: 14.5px; font-weight: 600; cursor: pointer;
+  }
+  #send:disabled { opacity: .5; cursor: default; }
+  .hint {
+    max-width: 860px; margin: 6px auto 0; font-size: 11.5px; color: #9aa0ab; text-align: center;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>GWM <span>TANK 500</span> · Sales Assistant <small style="opacity:.6;font-weight:400">local demo</small></h1>
+  <div class="controls">
+    <label for="actor">actor</label>
+    <input id="actor" value="demo-user-001" title="同一 actor 的偏好会被 Memory 跨会话记住；换一个 actor 即模拟新用户">
+    <button id="newsession" title="重置 session（保留 actor）——用来演示跨会话记忆">New session</button>
+  </div>
+</header>
+
+<div id="chat">
+  <div class="sysnote">中文 / English / Deutsch / Italiano — 用任何语言提问，助手会用相同语言回答。</div>
+  <div class="msg agent"><div class="bubble">Hi! I'm the Tank 500 sales assistant. Ask me about features, comparisons with other SUVs, local prices, or book a test drive. 你也可以用中文、德语或意大利语问我。</div></div>
+</div>
+
+<footer>
+  <div class="inputrow">
+    <textarea id="input" placeholder="Ask about the Tank 500…" rows="1"></textarea>
+    <button id="send">Send</button>
+  </div>
+  <div class="hint">Local demo only (127.0.0.1). Each reply calls the deployed AgentCore harness and may take 10–30s.</div>
+</footer>
+
+<script>
+  const chat = document.getElementById("chat");
+  const input = document.getElementById("input");
+  const send = document.getElementById("send");
+  const actor = document.getElementById("actor");
+  const newSessionBtn = document.getElementById("newsession");
+
+  function newSessionId() {
+    const uuid = (crypto.randomUUID ? crypto.randomUUID()
+      : Math.random().toString(36).slice(2) + Date.now().toString(36));
+    return "chat-" + uuid + "-" + Math.floor(Date.now() / 1000);
+  }
+  let sessionId = newSessionId();
+
+  function addMsg(role, text, extraClass) {
+    const wrap = document.createElement("div");
+    wrap.className = "msg " + role + (extraClass ? " " + extraClass : "");
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.textContent = text;
+    wrap.appendChild(bubble);
+    // 每条消息带发送/开始时间
+    const time = document.createElement("div");
+    time.className = "msgtime";
+    time.textContent = new Date().toLocaleTimeString("zh-CN",
+      { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    wrap.appendChild(time);
+    chat.appendChild(wrap);
+    chat.scrollTop = chat.scrollHeight;
+    return bubble;
+  }
+
+  // 点击图片新窗口看大图
+  chat.addEventListener("click", (e) => {
+    if (e.target.tagName === "IMG" && e.target.closest(".bubble")) {
+      window.open(e.target.src, "_blank", "noopener");
+    }
+  });
+
+  // ---- 轻量 markdown 渲染（先转义 HTML 再转换，避免注入） ----
+  function esc(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function inlineMd(s) {
+    return s
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, "$1<em>$2</em>")
+      // 图片先于链接处理（![alt](url) 是链接语法的超集）；仅允许 https
+      .replace(/!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/g,
+               '<img src="$2" alt="$1" loading="lazy">')
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
+               '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  }
+  function renderMarkdown(text) {
+    const lines = esc(text).split("\n");
+    const out = [];
+    let inCode = false, listType = null, tableBuf = [];
+
+    const closeList = () => { if (listType) { out.push(`</${listType}>`); listType = null; } };
+    const flushTable = () => {
+      if (!tableBuf.length) return;
+      const rows = tableBuf.filter(r => !/^\s*\|[\s\-:|]+\|\s*$/.test(r));
+      let html = "<table>";
+      rows.forEach((r, i) => {
+        const cells = r.replace(/^\s*\|/, "").replace(/\|\s*$/, "").split("|");
+        const tag = i === 0 ? "th" : "td";
+        html += "<tr>" + cells.map(c => `<${tag}>${inlineMd(c.trim())}</${tag}>`).join("") + "</tr>";
+      });
+      out.push(html + "</table>");
+      tableBuf = [];
+    };
+
+    for (const raw of lines) {
+      if (/^\s*```/.test(raw)) {
+        flushTable(); closeList();
+        out.push(inCode ? "</code></pre>" : "<pre><code>");
+        inCode = !inCode;
+        continue;
+      }
+      if (inCode) { out.push(raw + "\n"); continue; }
+      if (/^\s*\|.*\|\s*$/.test(raw)) { closeList(); tableBuf.push(raw); continue; }
+      flushTable();
+
+      const h = raw.match(/^(#{1,4})\s+(.*)$/);
+      if (h) { closeList(); out.push(`<h${h[1].length + 1}>${inlineMd(h[2])}</h${h[1].length + 1}>`); continue; }
+
+      const ul = raw.match(/^\s*[-*•]\s+(.*)$/);
+      const ol = raw.match(/^\s*\d+[.)]\s+(.*)$/);
+      if (ul || ol) {
+        const want = ul ? "ul" : "ol";
+        if (listType !== want) { closeList(); out.push(`<${want}>`); listType = want; }
+        out.push(`<li>${inlineMd((ul || ol)[1])}</li>`);
+        continue;
+      }
+      closeList();
+      if (raw.trim() === "") { out.push(""); continue; }
+      if (/^\s*(---|\*\*\*)\s*$/.test(raw)) { out.push("<hr>"); continue; }
+      out.push(`<p>${inlineMd(raw)}</p>`);
+    }
+    flushTable(); closeList();
+    if (inCode) out.push("</code></pre>");
+    return out.join("\n");
+  }
+
+  function addNote(text) {
+    const el = document.createElement("div");
+    el.className = "sysnote";
+    el.textContent = text;
+    chat.appendChild(el);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  newSessionBtn.addEventListener("click", () => {
+    sessionId = newSessionId();
+    addNote("— new session started (actor: " + (actor.value.trim() || "demo-user-001") +
+            ") · 同一 actor 的偏好会自动带入 —");
+  });
+
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text || send.disabled) return;
+    input.value = "";
+    addMsg("user", text);
+    const thinking = addMsg("agent", "thinking…", "thinking");
+    send.disabled = true;
+    try {
+      const resp = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+          session_id: sessionId,
+          actor_id: actor.value.trim() || "demo-user-001",
+        }),
+      });
+      if (!resp.ok || !resp.body) {
+        const data = await resp.json().catch(() => ({}));
+        throw new Error(data.error || ("HTTP " + resp.status));
+      }
+      // 流式读取：边到边渲染 markdown
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let acc = "";
+      let first = true;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        acc += decoder.decode(value, { stream: true });
+        if (first && acc.trim()) {
+          thinking.parentElement.classList.remove("thinking");
+          first = false;
+        }
+        const nearBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 120;
+        thinking.innerHTML = renderMarkdown(acc);
+        if (nearBottom) chat.scrollTop = chat.scrollHeight;
+      }
+      acc += decoder.decode();
+      if (!acc.trim()) {
+        thinking.parentElement.classList.remove("thinking");
+        thinking.textContent = "(no response — check that the harness is deployed and READY)";
+      } else {
+        thinking.innerHTML = renderMarkdown(acc.trim());
+      }
+    } catch (e) {
+      thinking.parentElement.classList.remove("thinking");
+      thinking.textContent = "Error: " + e.message;
+    } finally {
+      send.disabled = false;
+      chat.scrollTop = chat.scrollHeight;
+      input.focus();
+    }
+  }
+
+  send.addEventListener("click", sendMessage);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+  input.focus();
+</script>
+</body>
+</html>

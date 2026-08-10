@@ -1,0 +1,229 @@
+{
+  "_meta": {
+    "data_cutoff": "2025-06",
+    "note": "Indicative specs and price ranges compiled from public sources for demo purposes. Prices vary by trim, market and time — always confirm current pricing via web_search or a local dealer. Bare brand names (Toyota/丰田, Land Rover/路虎, Ford/福特) default to the same-segment flagship in this catalog.",
+    "markets": ["de", "uk", "it"]
+  },
+  "tank500": {
+    "name": "GWM Tank 500 HEV",
+    "body": {
+      "length_mm": 5078,
+      "width_mm": 1934,
+      "height_mm": 1905,
+      "wheelbase_mm": 2850,
+      "seats": 7,
+      "construction": "body-on-frame ladder chassis"
+    },
+    "powertrain": {
+      "type": "2.0L turbo petrol + hybrid (HEV)",
+      "combined_power_kw": 255,
+      "combined_torque_nm": 648,
+      "transmission": "9-speed hybrid automatic (9HAT)",
+      "drive": "full-time 4WD with low-range transfer case"
+    },
+    "offroad": {
+      "approach_angle_deg": 29.6,
+      "departure_angle_deg": 24,
+      "wading_depth_mm": 800,
+      "diff_locks": "electronic rear (and front on Off-Road trims)",
+      "terrain_modes": "all-terrain control system with multiple modes"
+    },
+    "efficiency": {
+      "fuel_combined_l_100km": 8.5
+    },
+    "price_range_indicative": {
+      "de": "EUR 62,000 - 72,000",
+      "uk": "GBP 55,000 - 65,000",
+      "it": "EUR 62,000 - 72,000"
+    },
+    "selling_points": [
+      "Full hybrid powertrain rare in the body-on-frame off-road SUV class",
+      "Luxury interior (Nappa leather, massage seats) at a value price point",
+      "Genuine off-road hardware: ladder frame, low range, locking differentials",
+      "7 seats standard; long warranty typical for GWM markets"
+    ]
+  },
+  "competitors": {
+    "toyota-land-cruiser-prado": {
+      "name": "Toyota Land Cruiser (250 Series / Prado)",
+      "body": {
+        "length_mm": 4925,
+        "width_mm": 1980,
+        "height_mm": 1870,
+        "wheelbase_mm": 2850,
+        "seats": "5 or 7",
+        "construction": "body-on-frame (TNGA-F)"
+      },
+      "powertrain": {
+        "type": "2.8L turbo-diesel (EU); 48V mild-hybrid on newer model years",
+        "combined_power_kw": 150,
+        "combined_torque_nm": 500,
+        "transmission": "8-speed automatic",
+        "drive": "full-time 4WD with low range"
+      },
+      "offroad": {
+        "approach_angle_deg": 31,
+        "departure_angle_deg": 22,
+        "wading_depth_mm": 700,
+        "diff_locks": "center + optional rear locking differential",
+        "terrain_modes": "Multi-Terrain Select"
+      },
+      "efficiency": {
+        "fuel_combined_l_100km": 8.9
+      },
+      "price_range_indicative": {
+        "de": "from ~EUR 78,000",
+        "uk": "from ~GBP 78,000",
+        "it": "from ~EUR 80,000"
+      },
+      "selling_points": [
+        "Legendary Land Cruiser reliability and resale value",
+        "Strong dealer/service network across Europe",
+        "Proven TNGA-F off-road platform"
+      ],
+      "vs_tank500": {
+        "tank500_advantages": [
+          "Significantly lower price for comparable size and equipment",
+          "Full hybrid petrol (no diesel emissions concerns in city zones); more power and torque",
+          "More luxury features standard (massage seats, larger screens)"
+        ],
+        "tank500_disadvantages": [
+          "Brand recognition and resale value in Europe far below Toyota",
+          "Dealer/service network still sparse",
+          "Land Cruiser has longer off-road pedigree and proven durability record"
+        ]
+      }
+    },
+    "land-rover-defender-110": {
+      "name": "Land Rover Defender 110",
+      "body": {
+        "length_mm": 5018,
+        "width_mm": 1996,
+        "height_mm": 1967,
+        "wheelbase_mm": 3022,
+        "seats": "5, 5+2 optional",
+        "construction": "aluminium monocoque (D7x)"
+      },
+      "powertrain": {
+        "type": "D250 3.0L I6 diesel MHEV (base); petrol P300/P400, PHEV P400e and V8 available",
+        "combined_power_kw": 183,
+        "combined_torque_nm": 570,
+        "transmission": "8-speed automatic",
+        "drive": "permanent AWD with low range, air suspension optional"
+      },
+      "offroad": {
+        "approach_angle_deg": 38,
+        "departure_angle_deg": 40,
+        "wading_depth_mm": 900,
+        "diff_locks": "center + optional rear active locking differential",
+        "terrain_modes": "Terrain Response 2"
+      },
+      "efficiency": {
+        "fuel_combined_l_100km": 8.8
+      },
+      "price_range_indicative": {
+        "de": "from ~EUR 67,000",
+        "uk": "from ~GBP 62,000",
+        "it": "from ~EUR 69,000"
+      },
+      "selling_points": [
+        "Premium brand image with iconic design",
+        "Class-leading off-road geometry and wading depth",
+        "Wide engine lineup from diesel to V8 and PHEV"
+      ],
+      "vs_tank500": {
+        "tank500_advantages": [
+          "Lower purchase price, especially against comparably equipped Defenders",
+          "7 seats standard vs optional 5+2",
+          "Ladder-frame simplicity; hybrid standard without PHEV price premium"
+        ],
+        "tank500_disadvantages": [
+          "Defender has better off-road geometry (approach/departure/wading)",
+          "Land Rover premium badge and interior design language",
+          "Air suspension and configurable Terrain Response not available on Tank 500"
+        ]
+      }
+    },
+    "ford-explorer-phev": {
+      "name": "Ford Explorer PHEV (EU, 2019-2023 model years)",
+      "availability_note": "New sales in the EU largely ended around 2023; mainly available used. The current EU 'Ford Explorer' is an unrelated mid-size EV. Verify local availability via web search.",
+      "body": {
+        "length_mm": 5063,
+        "width_mm": 2004,
+        "height_mm": 1778,
+        "wheelbase_mm": 3025,
+        "seats": 7,
+        "construction": "unibody"
+      },
+      "powertrain": {
+        "type": "3.0L V6 EcoBoost plug-in hybrid (PHEV)",
+        "combined_power_kw": 336,
+        "combined_torque_nm": 825,
+        "transmission": "10-speed automatic",
+        "drive": "intelligent AWD (no low range)"
+      },
+      "offroad": {
+        "approach_angle_deg": 20,
+        "departure_angle_deg": 22,
+        "wading_depth_mm": null,
+        "diff_locks": "none (brake-based traction control)",
+        "terrain_modes": "drive modes incl. trail/deep snow-sand"
+      },
+      "efficiency": {
+        "fuel_combined_l_100km": 3.1,
+        "note": "WLTP combined for PHEV assumes charged battery; real-world petrol consumption is much higher"
+      },
+      "price_range_indicative": {
+        "de": "was ~EUR 77,000 new; used market varies",
+        "uk": "not officially sold new (LHD-only in EU)",
+        "it": "was ~EUR 79,000 new; used market varies"
+      },
+      "selling_points": [
+        "Strong combined output and torque from V6 PHEV",
+        "Large 7-seat family SUV with US-style space",
+        "Low taxable emissions (PHEV) attractive for company-car rules"
+      ],
+      "vs_tank500": {
+        "tank500_advantages": [
+          "Real off-road hardware: ladder frame, low range, diff locks vs unibody soft-roader",
+          "Currently on sale as new; Explorer PHEV is effectively used-market only",
+          "Higher wading depth and better off-road geometry"
+        ],
+        "tank500_disadvantages": [
+          "Explorer PHEV has more system power/torque and plug-in electric range",
+          "Explorer offers lower taxable CO2 (PHEV) where company-car tax matters",
+          "Ford service network in Europe is much denser"
+        ]
+      }
+    }
+  },
+  "aliases": {
+    "toyota": "toyota-land-cruiser-prado",
+    "丰田": "toyota-land-cruiser-prado",
+    "普拉多": "toyota-land-cruiser-prado",
+    "霸道": "toyota-land-cruiser-prado",
+    "陆巡": "toyota-land-cruiser-prado",
+    "陆地巡洋舰": "toyota-land-cruiser-prado",
+    "兰德酷路泽": "toyota-land-cruiser-prado",
+    "land rover": "land-rover-defender-110",
+    "路虎": "land-rover-defender-110",
+    "卫士": "land-rover-defender-110",
+    "ford": "ford-explorer-phev",
+    "福特": "ford-explorer-phev",
+    "探险者": "ford-explorer-phev",
+    "prado": "toyota-land-cruiser-prado",
+    "land cruiser": "toyota-land-cruiser-prado",
+    "landcruiser": "toyota-land-cruiser-prado",
+    "land cruiser prado": "toyota-land-cruiser-prado",
+    "land cruiser 250": "toyota-land-cruiser-prado",
+    "toyota prado": "toyota-land-cruiser-prado",
+    "defender": "land-rover-defender-110",
+    "defender 110": "land-rover-defender-110",
+    "land rover defender": "land-rover-defender-110",
+    "landrover defender": "land-rover-defender-110",
+    "explorer": "ford-explorer-phev",
+    "explorer phev": "ford-explorer-phev",
+    "ford explorer": "ford-explorer-phev",
+    "ford explorer phev": "ford-explorer-phev"
+  }
+}

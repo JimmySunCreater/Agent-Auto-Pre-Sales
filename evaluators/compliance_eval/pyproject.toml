@@ -1,0 +1,16 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tank500_compliance"
+version = "0.1.0"
+description = "Tank 500 agent compliance-blocking evaluator (TRACE level)"
+requires-python = ">=3.10"
+dependencies = [
+    "bedrock-agentcore>=1.6.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["shared"]
+include = ["lambda_function.py", "span_adapter.py"]
